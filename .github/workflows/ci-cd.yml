@@ -57,9 +57,12 @@ jobs:
       - name: Run Laravel tests
         run: php artisan test
 
+      # Docker build depuis la racine du repo pour que le contexte soit correct
       - name: Build Docker image
         run: docker build -t cronwatch-app -f infra/docker/php/Dockerfile ./apps/backend
+        working-directory: ${{ github.workspace }}
 
+      # Test du container Laravel
       - name: Test Docker container
         run: |
           docker run --rm \
@@ -74,7 +77,9 @@ jobs:
             -e REDIS_PORT=6379 \
             cronwatch-app \
             php artisan test
+        working-directory: ${{ github.workspace }}
 
+      # Simulation des queues / Horizon
       - name: Check Horizon queues (optional)
         run: |
           echo "Simulate queue processing"
@@ -90,3 +95,4 @@ jobs:
             -e REDIS_PORT=6379 \
             cronwatch-app \
             php artisan queue:work --once
+        working-directory: ${{ github.workspace }}
