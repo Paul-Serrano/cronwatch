@@ -1,4 +1,4 @@
-name: Laravel CI/CD
+name: Laravel CI/CD (Pro)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test-and-build:
+  test-build:
     runs-on: ubuntu-latest
 
     services:
@@ -54,13 +54,39 @@ jobs:
           php artisan migrate
           php artisan config:cache
 
-      - name: Run tests
+      - name: Run Laravel tests
         run: php artisan test
 
       - name: Build Docker image
-        run: |
-          docker build -t cronwatch-app ./apps/backend
+        run: docker build -t cronwatch-app ./apps/backend
 
       - name: Test Docker container
         run: |
-          docker run --rm -e APP_ENV=testing cronwatch-app php artisan test
+          docker run --rm \
+            -e APP_ENV=testing \
+            -e DB_CONNECTION=pgsql \
+            -e DB_HOST=host.docker.internal \
+            -e DB_PORT=5432 \
+            -e DB_DATABASE=cronwatch_test \
+            -e DB_USERNAME=cronwatch \
+            -e DB_PASSWORD=secret \
+            -e REDIS_HOST=host.docker.internal \
+            -e REDIS_PORT=6379 \
+            cronwatch-app \
+            php artisan test
+
+      - name: Check Horizon queues (optional)
+        run: |
+          echo "Simulate queue processing"
+          docker run --rm \
+            -e APP_ENV=testing \
+            -e DB_CONNECTION=pgsql \
+            -e DB_HOST=host.docker.internal \
+            -e DB_PORT=5432 \
+            -e DB_DATABASE=cronwatch_test \
+            -e DB_USERNAME=cronwatch \
+            -e DB_PASSWORD=secret \
+            -e REDIS_HOST=host.docker.internal \
+            -e REDIS_PORT=6379 \
+            cronwatch-app \
+            php artisan queue:work --once
