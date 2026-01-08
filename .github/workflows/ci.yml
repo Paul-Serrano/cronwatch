@@ -1,9 +1,10 @@
-name: CI
+name: Laravel CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   laravel-tests:
@@ -29,19 +30,19 @@ jobs:
         working-directory: apps/backend
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: pdo_pgsql
-          coverage: none
 
-      - name: Install dependencies
+      - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare env
+      - name: Prepare .env
         run: |
           cp .env.example .env
           php artisan key:generate
