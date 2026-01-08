@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Dépendances système + outils de compilation PHP
+# Dépendances système + PHP build
 RUN apt-get update -o Acquire::Retries=3 \
     && apt-get install -y --no-install-recommends \
         git \
@@ -12,13 +12,10 @@ RUN apt-get update -o Acquire::Retries=3 \
         libicu-dev \
         libonig-dev \
         libxml2-dev \
-        libjpeg-dev \
-        libpng-dev \
-        libfreetype6-dev \
         $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
-# Extensions PHP nécessaires à Laravel
+# Extensions PHP Laravel
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -27,7 +24,6 @@ RUN docker-php-ext-install \
     exif \
     pcntl
 
-# Extensions avec configuration
 RUN docker-php-ext-configure intl \
     && docker-php-ext-configure zip \
     && docker-php-ext-install intl zip
@@ -37,13 +33,24 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Code Laravel
+# 1️⃣ Copier UNIQUEMENT composer files
+COPY composer.json composer.lock ./
+
+# 2️⃣ Installer dépendances SANS scripts
+RUN composer install \
+    --no-dev \
+    --prefer-dist \
+    --no-interaction \
+    --no-scripts \
+    --ignore-platform-reqs
+
+# 3️⃣ Copier le reste du projet
 COPY . .
 
-# Permissions Laravel
-RUN mkdir -p storage bootstrap/cache vendor \
+# 4️⃣ Permissions Laravel
+RUN mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache vendor \
-    && chmod -R 775 storage bootstrap/cache vendor
+    && chmod -R 775 storage bootstrap/cache
 
-# Dépendances Laravel
-RUN composer install --no-dev --prefer-dist --no-interaction --ignore-platform-reqs
+# 5️⃣ Lancer les scripts Laravel maintenant
+RUN composer dump-autoload --optimize
