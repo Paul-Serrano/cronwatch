@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Installer dépendances système
+# Dépendances système
 RUN apt-get update -o Acquire::Retries=3 \
     && apt-get install -y --no-install-recommends \
         git \
@@ -20,15 +20,18 @@ RUN apt-get update -o Acquire::Retries=3 \
         libfreetype6-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer extensions PHP nécessaires
+# Extensions PHP de base
+RUN docker-php-ext-install pdo pdo_pgsql bcmath mbstring tokenizer pcntl
+
+# Extensions PHP nécessitant configuration
 RUN docker-php-ext-configure intl \
     && docker-php-ext-configure zip \
-    && docker-php-ext-install pdo pdo_pgsql bcmath mbstring tokenizer pcntl exif intl zip
+    && docker-php-ext-install intl zip exif
 
-# Installer composer
+# Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Définir le dossier de travail
+# Dossier de travail
 WORKDIR /var/www/html
 
 # Copier le code Laravel
@@ -39,5 +42,5 @@ RUN mkdir -p storage bootstrap/cache vendor \
     && chown -R www-data:www-data storage bootstrap/cache vendor \
     && chmod -R 775 storage bootstrap/cache vendor
 
-# Installer les dépendances Laravel
+# Installer dépendances Laravel
 RUN composer install --no-dev --prefer-dist --no-interaction --ignore-platform-reqs
