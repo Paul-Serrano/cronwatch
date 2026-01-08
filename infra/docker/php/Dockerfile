@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Mettre à jour apt et installer les dépendances système
+# Installer dépendances système
 RUN apt-get update -o Acquire::Retries=3 \
     && apt-get install -y --no-install-recommends \
         git \
@@ -15,19 +15,15 @@ RUN apt-get update -o Acquire::Retries=3 \
         gnupg \
         ca-certificates \
         libicu-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libfreetype6-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer les extensions PHP nécessaires pour Laravel
-RUN docker-php-ext-install \
-        pdo \
-        pdo_pgsql \
-        zip \
-        bcmath \
-        mbstring \
-        exif \
-        pcntl \
-        tokenizer \
-        intl
+# Installer extensions PHP nécessaires
+RUN docker-php-ext-configure intl \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install pdo pdo_pgsql bcmath mbstring tokenizer pcntl exif intl zip
 
 # Installer composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
