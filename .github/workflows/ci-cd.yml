@@ -59,6 +59,7 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t cronwatch-app ./apps/backend
+        working-directory: ${{ github.workspace }}
 
       - name: Test Docker container
         run: |
@@ -74,6 +75,7 @@ jobs:
             -e REDIS_PORT=6379 \
             cronwatch-app \
             php artisan test
+        working-directory: ${{ github.workspace }}
 
       - name: Check Horizon queues (optional)
         run: |
