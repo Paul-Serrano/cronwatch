@@ -1,46 +1,49 @@
 FROM php:8.3-fpm
 
-# Dépendances système
+# Dépendances système + outils de compilation PHP
 RUN apt-get update -o Acquire::Retries=3 \
     && apt-get install -y --no-install-recommends \
         git \
         unzip \
-        libpq-dev \
         curl \
+        libpq-dev \
         libzip-dev \
         zlib1g-dev \
-        libxml2-dev \
-        libonig-dev \
-        apt-utils \
-        gnupg \
-        ca-certificates \
         libicu-dev \
+        libonig-dev \
+        libxml2-dev \
         libjpeg-dev \
         libpng-dev \
         libfreetype6-dev \
+        $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
-# Extensions PHP de base
-RUN docker-php-ext-install pdo pdo_pgsql bcmath mbstring tokenizer pcntl
+# Extensions PHP nécessaires à Laravel
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    bcmath \
+    mbstring \
+    exif \
+    pcntl
 
-# Extensions PHP nécessitant configuration
+# Extensions avec configuration
 RUN docker-php-ext-configure intl \
     && docker-php-ext-configure zip \
-    && docker-php-ext-install intl zip exif
+    && docker-php-ext-install intl zip
 
-# Installer Composer
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Dossier de travail
 WORKDIR /var/www/html
 
-# Copier le code Laravel
+# Code Laravel
 COPY . .
 
-# Permissions pour storage & bootstrap/cache et vendor
+# Permissions Laravel
 RUN mkdir -p storage bootstrap/cache vendor \
     && chown -R www-data:www-data storage bootstrap/cache vendor \
     && chmod -R 775 storage bootstrap/cache vendor
 
-# Installer dépendances Laravel
+# Dépendances Laravel
 RUN composer install --no-dev --prefer-dist --no-interaction --ignore-platform-reqs
