@@ -64,6 +64,7 @@ jobs:
       - name: Test Docker container
         run: |
           docker run --rm \
+            -w /var/www/html \
             -e APP_ENV=testing \
             -e DB_CONNECTION=pgsql \
             -e DB_HOST=host.docker.internal \
