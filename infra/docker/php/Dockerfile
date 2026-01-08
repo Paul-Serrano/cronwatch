@@ -1,10 +1,19 @@
 FROM php:8.3-fpm
 
 # Installer dépendances système + PHP extensions Laravel
-RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev curl libzip-dev zlib1g-dev \
-    libxml2-dev libonig-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip bcmath mbstring exif pcntl tokenizer
+RUN apt-get update -o Acquire::Retries=3 \
+    && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        libpq-dev \
+        curl \
+        libzip-dev \
+        zlib1g-dev \
+        libxml2-dev \
+        libonig-dev \
+        apt-utils \
+    && docker-php-ext-install pdo pdo_pgsql zip bcmath mbstring exif pcntl tokenizer \
+    && rm -rf /var/lib/apt/lists/*
 
 # Installer composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
