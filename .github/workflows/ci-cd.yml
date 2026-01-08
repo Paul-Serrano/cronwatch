@@ -58,7 +58,7 @@ jobs:
         run: php artisan test
 
       - name: Build Docker image
-        run: docker build -t cronwatch-app ./apps/backend
+        run: docker build -t cronwatch-app -f infra/docker/php/Dockerfile ./apps/backend
         working-directory: ${{ github.workspace }}
 
       - name: Test Docker container
