@@ -1,0 +1,25 @@
+services:
+  app:
+    image: cronwatch-app:latest
+    restart: always
+    env_file: .env
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  db:
+    image: postgres:16
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file: .env
+
+volumes:
+  pgdata:
