@@ -66,18 +66,23 @@ jobs:
         working-directory: ${{ github.workspace }}
 
       # 7️⃣ Déployer sur Fly.io
-      - name: Install Fly.io CLI
+      - name: Deploy to Fly.io
+        env:
+            FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
+            # Installer Fly CLI
             curl -L https://fly.io/install.sh | sh
             export FLYCTL_INSTALL="$HOME/.fly"
             export PATH="$FLYCTL_INSTALL/bin:$PATH"
-            fly version  
 
-      - name: Deploy to Fly.io
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          fly deploy --remote-only --config fly.toml
+            # Vérifier Fly
+            fly version
+
+            # Déployer
+            fly deploy --remote-only --config fly.toml
+
+            # Lancer les migrations
+            fly ssh console -C "php artisan migrate --force"
 
       # 8️⃣ Lancer les migrations sur Fly.io (si nécessaire)
       - name: Run migrations on Fly.io
