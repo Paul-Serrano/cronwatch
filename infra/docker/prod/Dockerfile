@@ -1,3 +1,6 @@
+# -------------------------
+# Base image PHP 8.3 FPM
+# -------------------------
 FROM php:8.3-fpm
 
 # -------------------------
@@ -45,8 +48,14 @@ COPY apps/backend/ .
 # -------------------------
 RUN mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache vendor \
-    && chmod -R 775 storage bootstrap/cache vendor \
-    && composer dump-autoload --optimize
+    && chmod -R 775 storage bootstrap/cache vendor
+
+# -------------------------
+# Cacher la configuration Laravel
+# -------------------------
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 # -------------------------
 # Exposer le port utilisé par Fly.io
@@ -54,7 +63,6 @@ RUN mkdir -p storage bootstrap/cache \
 EXPOSE 8080
 
 # -------------------------
-# Commande de démarrage
+# Commande de démarrage FPM
 # -------------------------
-# Fly.io route le trafic vers le port 8080
-CMD php artisan serve --host=0.0.0.0 --port=8080
+CMD ["php-fpm"]
