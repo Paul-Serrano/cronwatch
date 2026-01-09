@@ -27,6 +27,7 @@ WORKDIR /var/www/html
 COPY apps/backend/composer.json apps/backend/composer.lock ./
 
 # Installer dépendances Laravel
+ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
