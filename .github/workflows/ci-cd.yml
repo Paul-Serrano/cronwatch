@@ -86,4 +86,4 @@ jobs:
           args: >
             ssh console
             -a cronwatch
-            -C "php artisan migrate --force"
+            -C "sh -c 'php artisan migrate --force --no-interaction'"
