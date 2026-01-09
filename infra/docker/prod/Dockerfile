@@ -57,4 +57,4 @@ EXPOSE 8080
 # Commande de démarrage
 # -------------------------
 # Fly.io route le trafic vers le port 8080
-CMD php artisan migrate --force && php artisan config:cache && php artisan serve --host=0.0.0.0 --port=8080
+CMD php artisan serve --host=0.0.0.0 --port=8080

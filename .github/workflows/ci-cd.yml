@@ -83,4 +83,4 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         with:
-          args: ssh console -C "bash -c 'php artisan migrate --force'"
+          args: ssh console -a cronwatch -C "php artisan migrate --force"
