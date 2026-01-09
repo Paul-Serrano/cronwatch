@@ -16,28 +16,21 @@ RUN apt-get update -o Acquire::Retries=3 \
 # -------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# -------------------------
-# Dossier de travail
-# -------------------------
 WORKDIR /var/www/html
 
 # -------------------------
-# Copier composer pour cache Docker
+# Copier tout le code avant composer install
 # -------------------------
-COPY apps/backend/composer.json apps/backend/composer.lock ./
+COPY apps/backend/ .
 
+# -------------------------
 # Installer dépendances Laravel
+# -------------------------
 ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
-    --no-interaction \
-    --ignore-platform-reqs
-
-# -------------------------
-# Copier le reste du code
-# -------------------------
-COPY apps/backend/ .
+    --no-interaction
 
 # -------------------------
 # Permissions
@@ -48,13 +41,12 @@ RUN mkdir -p storage bootstrap/cache \
     && composer dump-autoload --optimize
 
 # -------------------------
-# Exposer le port Fly
+# Exposer le port
 # -------------------------
 EXPOSE 8080
+ENV PORT 8080
 
 # -------------------------
-# Entrypoint
+# Entrypoint Fly
 # -------------------------
-# Utiliser la variable $PORT fournie par Fly
-ENV PORT 8080
 CMD php artisan migrate --force && php artisan config:cache && php artisan serve --host=0.0.0.0 --port=${PORT}
