@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # PostgreSQL pour les tests
       postgres:
         image: postgres:16
         env:
@@ -26,7 +25,6 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
-      # Redis pour les tests
       redis:
         image: redis:7
         ports:
@@ -37,48 +35,50 @@ jobs:
         working-directory: apps/backend
 
     steps:
-      # 1️⃣ Checkout du code
+      # 1️⃣ Checkout code
       - uses: actions/checkout@v4
 
-      # 2️⃣ Installer PHP et extensions
+      # 2️⃣ Setup PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: pdo_pgsql redis
 
-      # 3️⃣ Installer les dépendances Composer
+      # 3️⃣ Install Composer deps (tests)
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      # 4️⃣ Préparer l'environnement de test
+      # 4️⃣ Prepare test env
       - name: Prepare env
         run: |
           cp .env.example .env
           php artisan key:generate
           php artisan migrate --force
 
-      # 5️⃣ Lancer les tests Laravel
+      # 5️⃣ Run Laravel tests
       - name: Run tests
         run: php artisan test
 
-      # 6️⃣ Build l'image Docker production
+      # 6️⃣ Build Docker prod image
       - name: Build Docker image
         run: docker build -t cronwatch-app -f infra/docker/prod/Dockerfile .
         working-directory: ${{ github.workspace }}
 
-      # 7️⃣ Déployer sur Fly.io
-      - name: Deploy to Fly.io
-        uses: superfly/flyctl-actions@v2
-        with:
-          args: deploy --remote-only --config fly.toml
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      # 7️⃣ Install Fly CLI
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
 
-      # 8️⃣ Lancer les migrations sur Fly.io
-      - name: Run migrations on Fly.io
-        uses: superfly/flyctl-actions@v2
-        with:
-          args: ssh console -C "php artisan migrate --force"
+      # 8️⃣ Deploy app to Fly.io
+      - name: Deploy to Fly.io
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy --remote-only --config fly.toml
+
+      # 9️⃣ Run migrations on Fly.io
+      - name: Run migrations on Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl ssh console -C "php artisan migrate --force"
