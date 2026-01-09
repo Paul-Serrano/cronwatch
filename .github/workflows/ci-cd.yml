@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      # PostgreSQL pour les tests
       postgres:
         image: postgres:16
         env:
@@ -25,6 +26,7 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+      # Redis pour les tests
       redis:
         image: redis:7
         ports:
@@ -35,7 +37,7 @@ jobs:
         working-directory: apps/backend
 
     steps:
-      # 1️⃣ Checkout le code
+      # 1️⃣ Checkout du code
       - uses: actions/checkout@v4
 
       # 2️⃣ Installer PHP et extensions
@@ -45,7 +47,7 @@ jobs:
           php-version: '8.3'
           extensions: pdo_pgsql redis
 
-      # 3️⃣ Installer les dépendances composer pour les tests
+      # 3️⃣ Installer les dépendances Composer
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
@@ -60,23 +62,23 @@ jobs:
       - name: Run tests
         run: php artisan test
 
-      # 6️⃣ Build l'image Docker prod
+      # 6️⃣ Build l'image Docker production
       - name: Build Docker image
         run: docker build -t cronwatch-app -f infra/docker/prod/Dockerfile .
         working-directory: ${{ github.workspace }}
 
-      # 7️⃣ Installer Fly CLI et déployer
+      # 7️⃣ Déployer sur Fly.io
       - name: Deploy to Fly.io
         uses: superfly/flyctl-actions@v2
         with:
-            args: deploy --remote-only --config fly.toml
+          args: deploy --remote-only --config fly.toml
         env:
-            FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       # 8️⃣ Lancer les migrations sur Fly.io
       - name: Run migrations on Fly.io
         uses: superfly/flyctl-actions@v2
         with:
-            args: ssh console -C "php artisan migrate --force"
+          args: ssh console -C "php artisan migrate --force"
         env:
-            FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
