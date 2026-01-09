@@ -16,24 +16,32 @@ RUN apt-get update -o Acquire::Retries=3 \
 # -------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# -------------------------
+# Dossier de travail
+# -------------------------
 WORKDIR /var/www/html
 
 # -------------------------
-# Copier tout le code avant composer install
+# Copier composer pour cache Docker
 # -------------------------
-COPY apps/backend/ .
+COPY apps/backend/composer.json apps/backend/composer.lock ./
 
-# -------------------------
 # Installer dépendances Laravel
-# -------------------------
 ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
-    --no-interaction
+    --no-interaction \
+    --no-scripts \
+    --ignore-platform-reqs
 
 # -------------------------
-# Permissions
+# Copier le reste du code
+# -------------------------
+COPY apps/backend/ .
+
+# -------------------------
+# Créer dossiers et fixer permissions
 # -------------------------
 RUN mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache vendor \
@@ -41,12 +49,12 @@ RUN mkdir -p storage bootstrap/cache \
     && composer dump-autoload --optimize
 
 # -------------------------
-# Exposer le port
+# Exposer le port utilisé par Fly.io
 # -------------------------
 EXPOSE 8080
-ENV PORT 8080
 
 # -------------------------
-# Entrypoint Fly
+# Commande de démarrage
 # -------------------------
-CMD php artisan migrate --force && php artisan config:cache && php artisan serve --host=0.0.0.0 --port=${PORT}
+# Fly.io route le trafic vers le port 8080
+CMD php artisan migrate --force && php artisan config:cache && php artisan serve --host=0.0.0.0 --port=8080
