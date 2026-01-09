@@ -4,6 +4,15 @@ primary_region = "cdg"
 [build]
   dockerfile = "infra/docker/prod/Dockerfile"
 
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "0"
+  DB_CONNECTION = "pgsql"
+  DB_HOST = "pgbouncer.1zvn90k4qe1rkpew.flympg.net"
+  DB_PORT = "5432"
+  DB_DATABASE = "fly-db"
+  DB_USERNAME = "fly-user"
+
 [http_service]
   internal_port = 8080
   force_https = true

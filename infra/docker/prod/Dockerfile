@@ -10,8 +10,8 @@ RUN apt-get update -o Acquire::Retries=3 \
     && apt-get install -y --no-install-recommends \
         git unzip curl libpq-dev libzip-dev zlib1g-dev \
         libicu-dev libonig-dev libxml2-dev bash build-essential \
-    && docker-php-ext-install \
-        pdo pdo_pgsql bcmath mbstring pcntl exif intl zip \
+        nginx supervisor \
+    && docker-php-ext-install pdo pdo_pgsql bcmath mbstring pcntl exif intl zip \
     && rm -rf /var/lib/apt/lists/*
 
 # -------------------------
@@ -31,12 +31,7 @@ COPY apps/backend/composer.json apps/backend/composer.lock ./
 
 # Installer dépendances Laravel
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction \
-    --no-scripts \
-    --ignore-platform-reqs
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
 
 # -------------------------
 # Copier le reste du code
@@ -51,11 +46,14 @@ RUN mkdir -p storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache vendor
 
 # -------------------------
-# Cacher la configuration Laravel
+# Configurer PHP-FPM pour écouter sur 9000 (FastCGI)
 # -------------------------
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+RUN sed -i 's/listen = .*/listen = 9000/' /usr/local/etc/php-fpm.d/www.conf
+
+# -------------------------
+# Copier configuration Nginx
+# -------------------------
+COPY infra/nginx/default.conf /etc/nginx/sites-available/default
 
 # -------------------------
 # Exposer le port utilisé par Fly.io
@@ -63,6 +61,6 @@ RUN php artisan config:cache \
 EXPOSE 8080
 
 # -------------------------
-# Commande de démarrage FPM
+# Commande de démarrage
 # -------------------------
-CMD ["php-fpm"]
+CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
