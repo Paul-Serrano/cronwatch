@@ -32,7 +32,6 @@ RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
-    --no-scripts \
     --ignore-platform-reqs
 
 # -------------------------
@@ -41,7 +40,7 @@ RUN composer install \
 COPY apps/backend/ .
 
 # -------------------------
-# Créer dossiers et fixer permissions
+# Permissions
 # -------------------------
 RUN mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache vendor \
@@ -49,12 +48,13 @@ RUN mkdir -p storage bootstrap/cache \
     && composer dump-autoload --optimize
 
 # -------------------------
-# Exposer le port utilisé par Fly.io
+# Exposer le port Fly
 # -------------------------
 EXPOSE 8080
 
 # -------------------------
-# Commande de démarrage
+# Entrypoint
 # -------------------------
-# Fly.io route le trafic vers le port 8080
-CMD php artisan migrate --force && php artisan config:cache && php artisan serve --host=0.0.0.0 --port=8080
+# Utiliser la variable $PORT fournie par Fly
+ENV PORT 8080
+CMD php artisan migrate --force && php artisan config:cache && php artisan serve --host=0.0.0.0 --port=${PORT}
