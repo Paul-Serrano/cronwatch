@@ -67,25 +67,16 @@ jobs:
 
       # 7️⃣ Déployer sur Fly.io
       - name: Deploy to Fly.io
+        uses: superfly/flyctl-actions@1.2
+        with:
+            args: deploy --remote-only --config fly.toml
         env:
             FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-            curl -L https://fly.io/install.sh | sh
-            export FLYCTL_INSTALL="$HOME/.fly"
-            export PATH="$FLYCTL_INSTALL/bin:$PATH"
-
-            # Vérifier Fly CLI
-            fly version
-
-            # Déployer
-            fly deploy --remote-only --config fly.toml
-
-            # Lancer les migrations
-            fly ssh console -C "php artisan migrate --force"
 
       # 8️⃣ Lancer les migrations sur Fly.io (si nécessaire)
       - name: Run migrations on Fly.io
+        uses: superfly/flyctl-actions@1.2
+        with:
+            args: "ssh console -C 'php artisan migrate --force'"
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          fly ssh console -C "php artisan migrate --force"
+            FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
