@@ -21,6 +21,9 @@ primary_region = "cdg"
   min_machines_running = 1
   processes = ["app"]
 
+[deploy]
+  release_command = "php /var/www/html/artisan migrate --force"
+
 [[vm]]
   memory = "1024mb"
   cpu_kind = "shared"
