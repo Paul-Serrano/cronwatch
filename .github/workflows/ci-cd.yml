@@ -62,7 +62,7 @@ jobs:
 
       # 6️⃣ Build l'image Docker prod
       - name: Build Docker image
-        run: docker build -t cronwatch-app -f infra/docker/prod/Dockerfile ./apps/backend
+        run: docker build -t cronwatch-app -f infra/docker/prod/Dockerfile .
         working-directory: ${{ github.workspace }}
 
       # 7️⃣ Déployer sur Fly.io
