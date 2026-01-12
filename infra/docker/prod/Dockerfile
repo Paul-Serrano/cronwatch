@@ -53,7 +53,7 @@ RUN sed -i 's/listen = .*/listen = 9000/' /usr/local/etc/php-fpm.d/www.conf
 # -------------------------
 # Copier configuration Nginx
 # -------------------------
-COPY infra/nginx/default.conf /etc/nginx/sites-available/default
+COPY infra/nginx/prod.conf /etc/nginx/sites-enabled/default
 
 # -------------------------
 # Exposer le port utilisé par Fly.io
