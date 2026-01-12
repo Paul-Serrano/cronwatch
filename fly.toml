@@ -12,6 +12,8 @@ primary_region = "cdg"
   DB_PORT = "5432"
   DB_DATABASE = "fly-db"
   DB_USERNAME = "fly-user"
+  LOG_CHANNEL = "stderr"
+  LOG_LEVEL = "info"
 
 [http_service]
   internal_port = 8080
