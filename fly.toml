@@ -15,7 +15,7 @@ primary_region = "cdg"
   LOG_CHANNEL = "stack"
   LOG_STACK = "stderr,betterstack"
   LOG_LEVEL = "info"
-  BETTERSTACK_ENDPOINT = "tls://s1674307.eu-nbg-2.betterstackdata.com:443?token=i8ZSPqVnosRztZv1ezYaNQsw"
+  BETTERSTACK_ENDPOINT = "tls://s1674307.eu-nbg-2.betterstackdata.com:443?token=dyChFCe9eTSbjuScry8VqRYB"
 
 [http_service]
   internal_port = 8080
