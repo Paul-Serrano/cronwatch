@@ -4,6 +4,8 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
+use Monolog\Handler\SocketHandler;
+use Monolog\Formatter\JsonFormatter;
 
 return [
 
@@ -104,6 +106,22 @@ return [
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'processors' => [PsrLogMessageProcessor::class],
         ],
+
+        'betterstack' => [
+        'driver' => 'monolog',
+        'level' => env('LOG_LEVEL', 'info'),
+        'handler' => SocketHandler::class,
+        'handler_with' => [
+            'connectionString' => env('BETTERSTACK_ENDPOINT'),
+            'timeout' => 10,
+            'writeTimeout' => 10,
+        ],
+        'formatter' => JsonFormatter::class,
+        'formatter_with' => [
+            'batchMode' => JsonFormatter::BATCH_MODE_NEWLINES,
+        ],
+    ],
+
 
         'syslog' => [
             'driver' => 'syslog',

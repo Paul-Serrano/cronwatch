@@ -26,8 +26,8 @@ class TestLogs extends Command
      */
     public function handle()
     {
-        Log::info('TEST LOG PROD');
-        Log::error('TEST ERROR PROD');
+        Log::info('BetterStack PROD OK', ['service' => 'cronwatch']);
+        Log::error('BetterStack PROD ERROR TEST');
         $this->info('Logs envoyés !');
     }
 }
