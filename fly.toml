@@ -17,8 +17,6 @@ primary_region = "cdg"
   LOG_LEVEL = "info"
   BETTERSTACK_ENDPOINT = "tls://s1674307.eu-nbg-2.betterstackdata.com:443?token=i8ZSPqVnosRztZv1ezYaNQsw"
 
-  LOG_LEVEL = "info"
-
 [http_service]
   internal_port = 8080
   force_https = true
