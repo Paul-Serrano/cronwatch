@@ -110,9 +110,14 @@ return [
         'betterstack' => [
         'driver' => 'monolog',
         'level' => env('LOG_LEVEL', 'info'),
-        'handler' => SocketHandler::class,
+        'handler' => Monolog\Handler\Curl\CurlHandler::class,
         'handler_with' => [
-            'connectionString' => env('BETTERSTACK_ENDPOINT'),
+            'endpoint' => env('BETTERSTACK_ENDPOINT'),
+            'headers' => [
+                'Authorization: Bearer ' . env('BETTERSTACK_TOKEN'),
+                'Content-Type: application/json',
+            ],
+            'formatter' => Monolog\Formatter\JsonFormatter::class,
             'timeout' => 10,
             'writeTimeout' => 10,
         ],
