@@ -12,7 +12,11 @@ primary_region = "cdg"
   DB_PORT = "5432"
   DB_DATABASE = "fly-db"
   DB_USERNAME = "fly-user"
-  LOG_CHANNEL = "stderr"
+  LOG_CHANNEL = "stack"
+  LOG_STACK = "stderr,betterstack"
+  LOG_LEVEL = "info"
+  BETTERSTACK_ENDPOINT = "tls://s1674307.eu-nbg-2.betterstackdata.com:443?token=i8ZSPqVnosRztZv1ezYaNQsw"
+
   LOG_LEVEL = "info"
 
 [http_service]
