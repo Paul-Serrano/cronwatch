@@ -1,7 +1,7 @@
 # -------------------------
-# Base image PHP 8.3 FPM
+# Base image PHP 8.4 FPM
 # -------------------------
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 # -------------------------
 # Dépendances système
