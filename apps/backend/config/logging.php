@@ -108,24 +108,18 @@ return [
         ],
 
         'betterstack' => [
-        'driver' => 'monolog',
-        'level' => env('LOG_LEVEL', 'info'),
-        'handler' => Monolog\Handler\Curl\CurlHandler::class,
-        'handler_with' => [
-            'endpoint' => env('BETTERSTACK_ENDPOINT'),
-            'headers' => [
-                'Authorization: Bearer ' . env('BETTERSTACK_TOKEN'),
-                'Content-Type: application/json',
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'info'),
+            'handler' => SocketHandler::class,
+            'handler_with' => [
+                'connectionString' => env('BETTERSTACK_ENDPOINT'),
+                'timeout' => 10,
+                'writeTimeout' => 10,
             ],
-            'formatter' => Monolog\Formatter\JsonFormatter::class,
-            'timeout' => 10,
-            'writeTimeout' => 10,
+            'processors' => [
+                PsrLogMessageProcessor::class,
+            ],
         ],
-        'formatter' => JsonFormatter::class,
-        'formatter_with' => [
-            'batchMode' => JsonFormatter::BATCH_MODE_NEWLINES,
-        ],
-    ],
 
 
         'syslog' => [
