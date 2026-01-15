@@ -1,8 +1,8 @@
 # Cronwatch
 
-Application Laravel déployée sur **Fly.io**, avec un environnement **local Dockerisé** et un pipeline **CI/CD GitHub Actions**.
+Application **Laravel** déployée sur **Fly.io**, avec un environnement **local Dockerisé** et un pipeline **CI/CD via GitHub Actions**.
 
-Ce README décrit **l’architecture**, **les environnements**, **les commandes essentielles** et **les pièges évités**.
+Ce projet est conçu avec une approche **production-first** : séparation claire des environnements, déploiement automatisé, observabilité et alerting fiables, sans dépendance à des outils payants.
 
 ---
 
@@ -62,7 +62,7 @@ cronwatch/
 
 - nginx écoute sur `localhost:8080`
 - adminer sur `localhost:8081`
-- PHP-FPM exposé sur le réseau Docker
+- PHP-FPM exposé uniquement sur le réseau Docker
 
 ### Nginx DEV (`infra/nginx/dev.conf`)
 
@@ -79,7 +79,7 @@ docker compose up --build
 ```
 
 Accès :
-- App : http://localhost:8080
+- Application : http://localhost:8080
 - Adminer : http://localhost:8081
 
 ---
@@ -90,7 +90,7 @@ Accès :
 
 - 1 VM Fly.io
 - nginx + php-fpm **dans le même container**
-- PostgreSQL via Fly.io (pg + pgbouncer)
+- PostgreSQL managé via Fly.io (pg + pgbouncer)
 
 ### Nginx PROD (`infra/nginx/prod.conf`)
 
@@ -100,17 +100,17 @@ location ~ \.php$ {
 }
 ```
 
-⚠️ **Il n’y a PAS de docker-compose en prod**
+⚠️ **Il n’y a PAS de docker-compose en production**
 
 ---
 
 ## 🛠 Dockerfile PROD (résumé)
 
-- PHP 8.3 FPM
+- PHP 8.4 FPM
 - Extensions PHP nécessaires
 - Composer
-- Build optimisé (no-dev)
-- nginx + php-fpm lancés ensemble
+- Build optimisé (`--no-dev`)
+- nginx + php-fpm lancés dans le même container
 
 ```dockerfile
 CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g 'daemon off;'"]
@@ -122,117 +122,19 @@ CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php art
 
 ### Gestion
 
-Les variables **NE SONT PAS dans le repo**.
-Elles sont stockées via :
+Les variables **ne sont jamais stockées dans le repository**.
+
+Elles sont définies via :
 
 ```bash
 fly secrets set APP_KEY=... DB_PASSWORD=...
 ```
 
-### Vérifier côté serveur
-
-```bash
-fly ssh console -a cronwatch
-php artisan tinker
-env('APP_KEY')
-```
-
 ---
 
-## 🚀 Déploiement
+## 🩺 Healthcheck & Alerting (Production)
 
-### Manuel
-
-```bash
-fly deploy
-```
-
-### Migrations en PROD
-
-Gérées automatiquement via `fly.toml` :
-
-```toml
-[deploy]
-release_command = "php artisan migrate --force"
-```
-
-✔️ Exécuté **à chaque déploiement**
-✔️ Dans un contexte sûr
-✔️ Sans SSH manuel
-
----
-
-## 🤖 CI/CD – GitHub Actions
-
-### Pipeline
-
-1. Checkout
-2. Build image Docker
-3. Deploy Fly.io
-4. Release command (migrations)
-
-Aucune commande `fly ssh console` nécessaire dans le workflow.
-
----
-
-## 🧠 Pièges évités
-
-### ❌ Erreur classique
-
-```
-host not found in upstream "app"
-```
-
-Cause :
-- Conf nginx DEV utilisée en PROD
-
-### ✅ Règle d’or
-
-| Environnement | fastcgi_pass |
-|--------------|-------------|
-| Docker | `app:9000` |
-| Fly.io | `127.0.0.1:9000` |
-
----
-
-## 🧪 Commandes utiles
-
-### Logs Fly.io
-
-```bash
-fly logs
-```
-
-### Statut machines
-
-```bash
-fly status
-```
-
-### Console serveur
-
-```bash
-fly ssh console -a cronwatch
-```
-
----
-
-## ✅ État actuel du projet
-
-- ✅ Laravel 12 fonctionnel
-- ✅ Environnements séparés
-- ✅ Déploiement stable
-- ✅ CI/CD propre
-- ✅ Base solide pour scaling
-
----
-
-## 📌 À faire plus tard (optionnel)
-
-- Horizon / queue worker
-- Scheduler Fly.io
-- Observabilité (Sentry, logs structurés)
-- Scaling horizontal
+Cronwatch utilise un **healthcheck applicatif** combiné à **Better Stack Uptime** pour détecter les pannes réelles et envoyer des alertes fiables.
 
 ---
 
@@ -240,8 +142,3 @@ fly ssh console -a cronwatch
 
 **Paul Serrano**  
 Backend Developer – Laravel / PHP  
-
----
-
-🟢 Projet prêt pour la production.
-
