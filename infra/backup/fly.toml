@@ -1,0 +1,5 @@
+app = "cronwatch-backup"
+primary_region = "cdg"
+
+[build]
+  dockerfile = "Dockerfile"

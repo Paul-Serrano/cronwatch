@@ -1,0 +1,2 @@
+# Tous les jours à 03:00 UTC
+0 3 * * * /backup/backup.sh

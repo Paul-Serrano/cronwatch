@@ -142,3 +142,8 @@ Cronwatch utilise un **healthcheck applicatif** combiné à **Better Stack Uptim
 
 **Paul Serrano**  
 Backend Developer – Laravel / PHP  
+
+
+keyId = 0032e957b2787050000000001
+application key = K003CBv1e41d1yG79D0JllQRAi3TV7k
+
