@@ -24,3 +24,7 @@ Route::get('/health', function () {
 
     return response()->json(['status' => 'ok'], 200);
 });
+
+Route::get('/boom', function () {
+    throw new \Exception('healthcheck incident test');
+});
