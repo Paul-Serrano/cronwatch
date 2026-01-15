@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'health' => [
+        'token' => env('HEALTHCHECK_TOKEN'),
+    ],
+
 ];
